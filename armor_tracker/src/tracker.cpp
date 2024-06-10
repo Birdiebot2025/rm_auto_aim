@@ -42,7 +42,7 @@ void Tracker::init(const Armors::SharedPtr & armors_msg)
       tracked_armor = armor;
     }
   }
-
+  
   initEKF(tracked_armor);
   RCLCPP_DEBUG(rclcpp::get_logger("armor_tracker"), "Init EKF!");
 
@@ -221,7 +221,10 @@ double Tracker::orientationToYaw(const geometry_msgs::msg::Quaternion & q)
   double roll, pitch, yaw;
   tf2::Matrix3x3(tf_q).getRPY(roll, pitch, yaw);
   // Make yaw change continuous (-pi~pi to -inf~inf)
-  yaw = last_yaw_ + angles::shortest_angular_distance(last_yaw_, yaw);
+  // 从 angle1 旋转到 angle2 所需的最短旋转距离。如果 distance 为正值，则表示需要逆时针旋转；如果 distance 为负值，则表示需要顺时针旋转。
+  // yaw = last_yaw_ + angles::shortest_angular_distance(last_yaw_, yaw);
+
+
   last_yaw_ = yaw;
   return yaw;
 }

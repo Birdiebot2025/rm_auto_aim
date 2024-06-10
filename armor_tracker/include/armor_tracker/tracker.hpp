@@ -61,7 +61,7 @@ public:
 
   // To store another pair of armors message
   double dz, another_r;
-
+  uint8_t pure_predict;
 private:
   void initEKF(const Armor & a);
 

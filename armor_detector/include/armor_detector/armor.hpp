@@ -32,6 +32,8 @@ struct Light : public cv::RotatedRect
     length = cv::norm(top - bottom);
     width = cv::norm(p[0] - p[1]);
 
+    // tilt_angle = std::atan2(std::abs(top.x - bottom.x), std::abs(top.y - bottom.y));
+    // tilt_angle = tilt_angle / CV_PI * 180;
     tilt_angle = std::atan2(std::abs(top.x - bottom.x), std::abs(top.y - bottom.y));
     tilt_angle = tilt_angle / CV_PI * 180;
   }
@@ -42,6 +44,15 @@ struct Light : public cv::RotatedRect
   double width;
   float tilt_angle;
 };
+
+struct boundingbox
+{
+  struct {
+      float x;
+      float y;
+  } p[4];
+};
+
 
 struct Armor
 {
@@ -62,10 +73,24 @@ struct Armor
   ArmorType type;
 
   // Number part
-  cv::Mat number_img;
+  // cv::Mat number_img;
   std::string number;
   float confidence;
   std::string classfication_result;
+};
+
+// struct v8_img_data
+// {
+//   std::vector<int> indexes;
+//   rm_auto_aim::boundingbox boundingbox;
+//   int class_id;
+//   float confidence;
+// };
+struct v8_cls_confidence
+{
+  float confidence_sentry_B;
+  float confidence_sentry_N;
+  float confidence_sentry_R;
 };
 
 }  // namespace rm_auto_aim

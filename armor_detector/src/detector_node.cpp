@@ -24,13 +24,14 @@
 #include "armor_detector/armor.hpp"
 #include "armor_detector/detector_node.hpp"
 
+#include "armor_detector/common.hpp"
+
 namespace rm_auto_aim
 {
 ArmorDetectorNode::ArmorDetectorNode(const rclcpp::NodeOptions & options)
 : Node("armor_detector", options)
 {
   RCLCPP_INFO(this->get_logger(), "Starting DetectorNode!");
-
   // Detector
   detector_ = initDetector();
 
@@ -194,6 +195,8 @@ std::unique_ptr<Detector> ArmorDetectorNode::initDetector()
     this->declare_parameter("ignore_classes", std::vector<std::string>{"negative"});
   detector->classifier =
     std::make_unique<NumberClassifier>(model_path, label_path, threshold, ignore_classes);
+  
+  detector->loadModel("/home/hero/Desktop/yolov8_test/4point_best.onnx");
 
   return detector;
 }
@@ -217,8 +220,8 @@ std::vector<Armor> ArmorDetectorNode::detectArmors(
 
   // Publish debug info
   if (debug_) {
-    binary_img_pub_.publish(
-      cv_bridge::CvImage(img_msg->header, "mono8", detector_->binary_img).toImageMsg());
+    // binary_img_pub_.publish(
+    //   cv_bridge::CvImage(img_msg->header, "mono8", detector_->binary_img).toImageMsg());
 
     // Sort lights and armors data by x coordinate
     std::sort(
@@ -231,13 +234,13 @@ std::vector<Armor> ArmorDetectorNode::detectArmors(
     lights_data_pub_->publish(detector_->debug_lights);
     armors_data_pub_->publish(detector_->debug_armors);
 
-    if (!armors.empty()) {
-      auto all_num_img = detector_->getAllNumbersImage();
-      number_img_pub_.publish(
-        *cv_bridge::CvImage(img_msg->header, "mono8", all_num_img).toImageMsg());
-    }
+    // if (!armors.empty()) {
+    //   auto all_num_img = detector_->getAllNumbersImage();
+    //   number_img_pub_.publish(
+    //     *cv_bridge::CvImage(img_msg->header, "mono8", all_num_img).toImageMsg());
+    // }
 
-    detector_->drawResults(img);
+    // detector_->drawResults(img);
     // Draw camera center
     cv::circle(img, cam_center_, 5, cv::Scalar(255, 0, 0), 2);
     // Draw latency
