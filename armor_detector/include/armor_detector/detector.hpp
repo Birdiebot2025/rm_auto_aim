@@ -70,14 +70,13 @@ public:
   // std::vector<Armor> matchLights(const std::vector<Light> & lights);
   std::vector<Light> findLights_v8(const cv::Mat & rbg_img, const cv::Mat & binary_img);
   std::vector<Armor> matchLights_v8(const std::vector<Light> & lights);
-  void draw(const cv::Mat & input, std::vector<v8_cls_confidence> v8_cls_confidences, std::vector<boundingbox> boundingboxs, std::vector<float> confidences);
+  void draw(std::vector<int> indexes, const cv::Mat & input, std::vector<v8_cls_confidence> v8_cls_confidences, std::vector<boundingbox> boundingboxs, std::vector<float> confidences);
 
   // For debug usage
   cv::Mat getAllNumbersImage();
   void drawResults(cv::Mat & img);
   void loadModel(const std::string &model_file);
   int class_id(rm_auto_aim::v8_cls_confidence cls);
-
 
   int binary_thres;
   int detect_color;

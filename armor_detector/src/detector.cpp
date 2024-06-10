@@ -18,15 +18,12 @@ std::vector<Armor> Detector::detect(const cv::Mat & input)
   // static const std::vector<std::string> class_names = {
   //   "sentry_B", "sentry_N", "sentry_R"
   // };
-  static const std::string model_file = "/home/hero/Desktop/yolov8_test/4point_best.onnx";
+  // static const std::string model_file = "/home/hero/Desktop/yolov8_test/4point_best.onnx";
 
   try {
         // 获取模型输入节点
         ov::Tensor input_tensor = infer_request_.get_input_tensor();
-        // input_tensor = infer_request.get_input_tensor();
         const int64 start = cv::getTickCount();
-        // 读取图片并按照模型输入要求进行预处理
-        // cv::Mat image = cv::imread(image_file, cv::IMREAD_COLOR);
 
         // cv::Mat input ;
         // cv::resize(input_, input, cv::Size(640, 640));
@@ -35,7 +32,6 @@ std::vector<Armor> Detector::detect(const cv::Mat & input)
         /// 执行推理计算
         infer_request_.infer();
 
-        /// 处理推理计算结果
         // 获得推理结果
         const ov::Tensor output = infer_request_.get_output_tensor();
         const ov::Shape output_shape = output.get_shape();
@@ -53,7 +49,6 @@ std::vector<Armor> Detector::detect(const cv::Mat & input)
         std::vector<Light> lights_all;
         std::vector<boundingbox> boundingboxs;
         std::vector<v8_cls_confidence> v8_cls_confidences;
-        // std::vector<std::map<std::string, float>> v8_cls_confidences;
 
         cv::RotatedRect rect_;
         rect_.center = cv::Point2f(100, 100);
@@ -79,10 +74,7 @@ std::vector<Armor> Detector::detect(const cv::Mat & input)
             // 置信度 0～1之间
             if (score > 0.6) {
               rm_auto_aim::v8_cls_confidence v8_cls_confidence;
-              // std::map<std::string, float> v8_cls_confidence;
-              // v8_cls_confidence["confidence_sentry_B"] = det_output.at<float>(4, i);
-              // v8_cls_confidence["confidence_sentry_N"] = det_output.at<float>(5, i);
-              // v8_cls_confidence["confidence_sentry_R"] = det_output.at<float>(6, i);
+
               // std::cout << "----------------------------------" << std::endl;
               // std::cout << det_output.at<float>(4, i) << std::endl;
               // std::cout << det_output.at<float>(5, i) << std::endl;
@@ -93,20 +85,10 @@ std::vector<Armor> Detector::detect(const cv::Mat & input)
               v8_cls_confidence.confidence_sentry_N = det_output.at<float>(5, i);
               v8_cls_confidence.confidence_sentry_R = det_output.at<float>(6, i);
 
-              // std::cout << "----------------------------------" << std::endl;
-              // std::cout << v8_cls_confidence.confidence_sentry_B << std::endl;
-              // std::cout << v8_cls_confidence.confidence_sentry_N << std::endl;
-              // std::cout << v8_cls_confidence.confidence_sentry_R << std::endl;
-              // std::cout << "----------------------------------" << std::endl;
-
               float cx = 2.25*det_output.at<float>(0, i);
               float cy = 2.25*det_output.at<float>(1, i);
               float ow = 2.25*det_output.at<float>(2, i);
               float oh = 2.25*det_output.at<float>(3, i);
-              // float cx = det_output.at<float>(0, i);
-              // float cy = det_output.at<float>(1, i);
-              // float ow = det_output.at<float>(2, i);
-              // float oh = det_output.at<float>(3, i);
 
               cv::RotatedRect rect;
               rect.center = cv::Point2f(cx, cy);
@@ -124,16 +106,6 @@ std::vector<Armor> Detector::detect(const cv::Mat & input)
               boundingbox.p[2].y = 2.25*det_output.at<float>(12, i);
               boundingbox.p[1].x = 2.25*det_output.at<float>(13, i);
               boundingbox.p[1].y = 2.25*det_output.at<float>(14, i);
-
-              // boundingbox.p[0].x = det_output.at<float>(7, i);
-              // boundingbox.p[0].y = det_output.at<float>(8, i);
-              // boundingbox.p[3].x = det_output.at<float>(9, i);
-              // boundingbox.p[3].y = det_output.at<float>(10, i);
-
-              // boundingbox.p[2].x = det_output.at<float>(11, i);
-              // boundingbox.p[2].y = det_output.at<float>(12, i);
-              // boundingbox.p[1].x = det_output.at<float>(13, i);
-              // boundingbox.p[1].y = det_output.at<float>(14, i);
 
               lights_all.push_back(lights);
               lights_ = lights;
@@ -153,10 +125,10 @@ std::vector<Armor> Detector::detect(const cv::Mat & input)
             }
         }
         // NMS, 消除具有较低置信度的冗余重叠框
-        // std::vector<int> indexes;
-        // cv::dnn::NMSBoxes(boxes, confidences, 0.25f, 0.45f, indexes);
+        std::vector<int> indexes;
+        cv::dnn::NMSBoxes(boxes, confidences, 0.6f, 0.45f, indexes);
 
-        draw(input, v8_cls_confidences, boundingboxs, confidences);
+        draw(indexes, input, v8_cls_confidences, boundingboxs, confidences);
 
         // std::cout<<indexes.size()<<std::endl;
         std::cout<<boundingboxs.size()<<std::endl;
@@ -168,14 +140,6 @@ std::vector<Armor> Detector::detect(const cv::Mat & input)
         const float t = (cv::getTickCount() - start) / static_cast<float>(cv::getTickFrequency());
         std::cout << "Infer time(ms): " << t * 1000 << "ms; Detections: " << v8_cls_confidences.size() << std::endl;
         cv::putText(input, cv::format("FPS: %.2f", 1.0 / t), cv::Point(20, 40), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(255, 0, 0), 2, 8);
-        /// 获取程序名称
-        // const std::string programName{extractedProgramName(argv[0])};
-        // cv::imshow("v8_sentry", input);
-        // /// 保存结果图
-        // save(programName, image);
-
-        // cv::waitKey(0);
-        // cv::destroyAllWindows();
 
     } catch (const std::exception &e) {
         std::cerr << "exception: " << e.what() << std::endl;
@@ -207,33 +171,30 @@ void Detector::loadModel(const std::string &model_file) {
     infer_request_ = compiled_model_.create_infer_request();
 }
 
-void Detector::draw(const cv::Mat & input, std::vector<v8_cls_confidence> v8_cls_confidences, std::vector<boundingbox> boundingboxs, std::vector<float> confidences){
+void Detector::draw(std::vector<int> indexes, const cv::Mat & input, std::vector<v8_cls_confidence> v8_cls_confidences, std::vector<boundingbox> boundingboxs, std::vector<float> confidences)
+{
   static const std::vector<std::string> class_names = {
     "sentry_B", "sentry_N", "sentry_R"
   };
-  for (size_t i = 0; i < confidences.size(); i++) {
-      std::vector<cv::Point> points;
-      for (int j = 0; j < 4; j++) {
-          points.emplace_back(boundingboxs[i].p[j].x, boundingboxs[i].p[j].y);
-          // std::cout<<points<<std::endl;
-      }
-      int number = class_id(v8_cls_confidences[i]);
-      // auto cls_confidence = std::max_element(v8_cls_confidence.begin(), v8_cls_confidence.end(),
-      //   [](const std::pair<std::string, float>& p1, const std::pair<std::string, float>& p2) {
-      //       return p1.second < p2.second;
-      //   });
-      // 绘制四边形
-      cv::polylines(input, points, true, cv::Scalar(0, 255, 0), 2, cv::LINE_8);
-      // cv::rectangle(image, box, cv::Scalar(0, 0, 255), 2, 8);
-      // 绘制标签
-      const std::string label = class_names[number] + ":" + std::to_string(confidences[i]).substr(0, 4);
-      // const std::string label = max(v8_cls_confidence, key=dic.get) + ":" + std::to_string(confidences[i]).substr(0, 4);
 
-      const cv::Size textSize = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.7, 20, nullptr);
-      const cv::Rect textBox(boundingboxs[i].p[0].x, boundingboxs[i].p[0].y - 15, textSize.width, textSize.height + 5);
-      // cv::rectangle(input, textBox, cv::Scalar(0, 255, 255), cv::FILLED);
-      cv::putText(input, label, cv::Point(boundingboxs[i].p[0].x, boundingboxs[i].p[0].y), cv::FONT_HERSHEY_SIMPLEX, 1,
-                  cv::Scalar(255, 255, 255));
+  for(auto i:indexes){
+    std::vector<cv::Point> points;
+    for (int j = 0; j < 4; j++) {
+        points.emplace_back(boundingboxs[i].p[j].x, boundingboxs[i].p[j].y);
+    }
+    int number = class_id(v8_cls_confidences[i]);
+    // auto cls_confidence = std::max_element(v8_cls_confidence.begin(), v8_cls_confidence.end(),
+    //   [](const std::pair<std::string, float>& p1, const std::pair<std::string, float>& p2) {
+    //       return p1.second < p2.second;
+    //   });
+    cv::polylines(input, points, true, cv::Scalar(0, 255, 0), 2, cv::LINE_8);
+    // cv::rectangle(image, box, cv::Scalar(0, 0, 255), 2, 8);
+    const std::string label = class_names[number] + ":" + std::to_string(confidences[i]).substr(0, 4);
+    const cv::Size textSize = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.7, 20, nullptr);
+    const cv::Rect textBox(boundingboxs[i].p[0].x, boundingboxs[i].p[0].y - 15, textSize.width, textSize.height + 5);
+    // cv::rectangle(input, textBox, cv::Scalar(0, 255, 255), cv::FILLED);
+    cv::putText(input, label, cv::Point(boundingboxs[i].p[0].x, boundingboxs[i].p[0].y), cv::FONT_HERSHEY_SIMPLEX, 1,
+                cv::Scalar(255, 255, 255));
   }
 
 }
