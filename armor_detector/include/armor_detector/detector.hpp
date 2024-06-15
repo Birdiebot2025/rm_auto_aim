@@ -68,14 +68,14 @@ public:
   cv::Mat preprocessImage(const cv::Mat & input);
   // std::vector<Light> findLights(const cv::Mat & rbg_img, const cv::Mat & binary_img);
   // std::vector<Armor> matchLights(const std::vector<Light> & lights);
-  std::vector<Light> findLights_v8(const cv::Mat & rbg_img, const cv::Mat & binary_img);
-  std::vector<Armor> matchLights_v8(const std::vector<Light> & lights);
+  std::vector<Light> findLights_v8(std::vector<int> indexes, std::vector<boundingbox> boundingboxs, std::vector<cv::Rect> boxes);
+  std::vector<Armor> matchLights_v8(std::vector<int> indexes, std::vector<boundingbox> boundingboxs, std::vector<cv::Rect> boxes);
   void draw(std::vector<int> indexes, const cv::Mat & input, std::vector<v8_cls_confidence> v8_cls_confidences, std::vector<boundingbox> boundingboxs, std::vector<float> confidences);
 
   // For debug usage
   cv::Mat getAllNumbersImage();
   void drawResults(cv::Mat & img);
-  void loadModel(const std::string &model_file);
+  void loadModel(const std::string &modelXml, const std::string &modelBin);
   int class_id(rm_auto_aim::v8_cls_confidence cls);
 
   int binary_thres;

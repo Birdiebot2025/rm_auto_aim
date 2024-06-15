@@ -196,7 +196,7 @@ std::unique_ptr<Detector> ArmorDetectorNode::initDetector()
   detector->classifier =
     std::make_unique<NumberClassifier>(model_path, label_path, threshold, ignore_classes);
   
-  detector->loadModel("/home/hero/Desktop/yolov8_test/4point_best.onnx");
+  detector->loadModel("/home/hero/Desktop/rm_vision/src/model/best.xml", "/home/hero/Desktop/rm_vision/src/model/best.bin");
 
   return detector;
 }
