@@ -174,7 +174,7 @@ void Tracker::updateArmorsNum(const Armor & armor)
 {
   if (armor.type == "large" && (tracked_id == "3" || tracked_id == "4" || tracked_id == "5")) {
     tracked_armors_num = ArmorsNum::BALANCE_2;
-  } else if (tracked_id == "outpost") {
+  } else if (tracked_id == "6") {
     tracked_armors_num = ArmorsNum::OUTPOST_3;
   } else {
     tracked_armors_num = ArmorsNum::NORMAL_4;

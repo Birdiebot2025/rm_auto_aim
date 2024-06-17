@@ -164,7 +164,8 @@ std::unique_ptr<Detector> ArmorDetectorNode::initDetector()
   param_desc.integer_range[0].step = 1;
   param_desc.integer_range[0].from_value = 0;
   param_desc.integer_range[0].to_value = 255;
-  int binary_thres = declare_parameter("binary_thres", 160, param_desc);
+  // int binary_thres = declare_parameter("binary_thres", 160, param_desc);
+  // auto detector = std::make_unique<Detector>(detect_color, l_params, a_params);
 
   param_desc.description = "0-RED, 1-BLUE";
   param_desc.integer_range[0].from_value = 0;
@@ -183,8 +184,10 @@ std::unique_ptr<Detector> ArmorDetectorNode::initDetector()
     .min_large_center_distance = declare_parameter("armor.min_large_center_distance", 3.2),
     .max_large_center_distance = declare_parameter("armor.max_large_center_distance", 5.5),
     .max_angle = declare_parameter("armor.max_angle", 35.0)};
+  
+  auto detector = std::make_unique<Detector>(detect_color, l_params, a_params);
 
-  auto detector = std::make_unique<Detector>(binary_thres, detect_color, l_params, a_params);
+  // auto detector = std::make_unique<Detector>(binary_thres, detect_color, l_params, a_params);
 
   // Init classifier
   auto pkg_path = ament_index_cpp::get_package_share_directory("armor_detector");
@@ -208,9 +211,9 @@ std::vector<Armor> ArmorDetectorNode::detectArmors(
   auto img = cv_bridge::toCvShare(img_msg, "rgb8")->image;
 
   // Update params
-  detector_->binary_thres = get_parameter("binary_thres").as_int();
+  // detector_->binary_thres = get_parameter("binary_thres").as_int();
   detector_->detect_color = get_parameter("detect_color").as_int();
-  detector_->classifier->threshold = get_parameter("classifier_threshold").as_double();
+  // detector_->classifier->threshold = get_parameter("classifier_threshold").as_double();
 
   auto armors = detector_->detect(img);
 

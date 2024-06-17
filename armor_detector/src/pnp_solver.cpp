@@ -34,16 +34,19 @@ PnPSolver::PnPSolver(
 bool PnPSolver::solvePnP(const Armor & armor, cv::Mat & rvec, cv::Mat & tvec)
 {
   std::vector<cv::Point2f> image_armor_points;
+  
+  cv::Point2f left_light_bottom, left_light_top, right_light_top, right_light_bottom;
+  left_light_bottom = cv::Point2f(armor.light_points.p[3].x, armor.light_points.p[3].y);
+  left_light_top = cv::Point2f(armor.light_points.p[0].x, armor.light_points.p[0].y);
+  right_light_top = cv::Point2f(armor.light_points.p[1].x, armor.light_points.p[1].y);
+  right_light_bottom = cv::Point2f(armor.light_points.p[2].x, armor.light_points.p[2].y);
 
   // Fill in image points
-  // image_armor_points.emplace_back(armor.left_light.bottom);
-  // image_armor_points.emplace_back(armor.left_light.top);
-  // image_armor_points.emplace_back(armor.right_light.top);
-  // image_armor_points.emplace_back(armor.right_light.bottom);
-  image_armor_points.emplace_back(armor.left_light.bottom);
-  image_armor_points.emplace_back(armor.left_light.top);
-  image_armor_points.emplace_back(armor.right_light.top);
-  image_armor_points.emplace_back(armor.right_light.bottom);
+  // 左下，左上，右上，右下
+  image_armor_points.emplace_back(left_light_bottom);
+  image_armor_points.emplace_back(left_light_top);
+  image_armor_points.emplace_back(right_light_top);
+  image_armor_points.emplace_back(right_light_bottom);
   // Solve pnp
   auto object_points = armor.type == ArmorType::SMALL ? small_armor_points_ : large_armor_points_;
   return cv::solvePnP(

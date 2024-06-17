@@ -61,15 +61,14 @@ public:
     double max_angle;
   };
 
-  Detector(const int & bin_thres, const int & color, const LightParams & l, const ArmorParams & a);
+  // Detector(const int & bin_thres, const int & color, const LightParams & l, const ArmorParams & a);
+  Detector(const int & color, const LightParams & l, const ArmorParams & a);
 
   std::vector<Armor> detect(const cv::Mat & input);
 
   cv::Mat preprocessImage(const cv::Mat & input);
-  // std::vector<Light> findLights(const cv::Mat & rbg_img, const cv::Mat & binary_img);
-  // std::vector<Armor> matchLights(const std::vector<Light> & lights);
-  std::vector<Light> findLights_v8(std::vector<int> indexes, std::vector<boundingbox> boundingboxs, std::vector<cv::Rect> boxes);
-  std::vector<Armor> matchLights_v8(std::vector<int> indexes, std::vector<boundingbox> boundingboxs, std::vector<cv::Rect> boxes);
+  std::vector<Light_v8> findLights_v8(std::vector<int> indexes, std::vector<boundingbox> boundingboxs, std::vector<cv::Rect> boxes);
+  std::vector<Armor> matchLights_v8(std::vector<rm_auto_aim::v8_cls_confidence> cls, std::vector<Light_v8> lights, std::vector<int> indexes, std::vector<boundingbox> boundingboxs);
   void draw(std::vector<int> indexes, const cv::Mat & input, std::vector<v8_cls_confidence> v8_cls_confidences, std::vector<boundingbox> boundingboxs, std::vector<float> confidences);
 
   // For debug usage
@@ -77,6 +76,8 @@ public:
   void drawResults(cv::Mat & img);
   void loadModel(const std::string &modelXml, const std::string &modelBin);
   int class_id(rm_auto_aim::v8_cls_confidence cls);
+  int class_color(rm_auto_aim::v8_cls_confidence cls);
+  std::string class_id_number(rm_auto_aim::v8_cls_confidence cls);
 
   int binary_thres;
   int detect_color;
@@ -91,12 +92,8 @@ public:
   auto_aim_interfaces::msg::DebugArmors debug_armors;
 
 private:
-  bool isLight(const Light & possible_light);
-  bool containLight(
-    const Light & light_1, const Light & light_2, const std::vector<Light> & lights);
-  ArmorType isArmor(const Light & light_1, const Light & light_2);
-
-  std::vector<Light> lights_;
+  ArmorType isArmor(const Light_v8 & light);
+  std::vector<Light_v8> lights_;
   std::vector<Armor> armors_;
   ov::CompiledModel compiled_model_;
   ov::InferRequest infer_request_;

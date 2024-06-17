@@ -104,13 +104,13 @@ void NumberClassifier::classify(std::vector<Armor> & armors)
   //   float sum = static_cast<float>(cv::sum(softmax_prob)[0]);
   //   softmax_prob /= sum;
 
-  //   double confidence;
-  //   cv::Point class_id_point;
-  //   minMaxLoc(softmax_prob.reshape(1, 1), nullptr, &confidence, nullptr, &class_id_point);
-  //   int label_id = class_id_point.x;
+    // double confidence;
+    // cv::Point class_id_point;
+    // minMaxLoc(softmax_prob.reshape(1, 1), nullptr, &confidence, nullptr, &class_id_point);
+    // int label_id = class_id_point.x;
 
-  //   armor.confidence = confidence;
-  //   armor.number = class_names_[label_id];
+    // armor.confidence = confidence;
+    // armor.number = class_names_[label_id];
 
   //   std::stringstream result_ss;
   //   result_ss << armor.number << ": " << std::fixed << std::setprecision(1)

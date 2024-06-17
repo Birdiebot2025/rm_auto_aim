@@ -18,55 +18,6 @@ const int BLUE = 1;
 enum class ArmorType { SMALL, LARGE, INVALID };
 const std::string ARMOR_TYPE_STR[3] = {"small", "large", "invalid"};
 
-struct Light : public cv::RotatedRect
-{
-  Light() = default;
-  explicit Light(cv::RotatedRect box) : cv::RotatedRect(box)
-  {
-    cv::Point2f p[4];
-    box.points(p);
-    std::sort(p, p + 4, [](const cv::Point2f & a, const cv::Point2f & b) { return a.y < b.y; });
-    top = (p[0] + p[1]) / 2;
-    bottom = (p[2] + p[3]) / 2;
-
-    length = cv::norm(top - bottom);
-    width = cv::norm(p[0] - p[1]);
-
-    // tilt_angle = std::atan2(std::abs(top.x - bottom.x), std::abs(top.y - bottom.y));
-    // tilt_angle = tilt_angle / CV_PI * 180;
-    tilt_angle = std::atan2(std::abs(top.x - bottom.x), std::abs(top.y - bottom.y));
-    tilt_angle = tilt_angle / CV_PI * 180;
-  }
-
-  int color;
-  cv::Point2f top, bottom;
-  double length;
-  double width;
-  float tilt_angle;
-};
-
-struct Light_v8 : public cv::RotatedRect
-{
-  Light_v8() = default;
-  explicit Light_v8(cv::RotatedRect box) : cv::RotatedRect(box)
-  {
-    cv::Point2f p[4];
-    box.points(p);
-    std::sort(p, p + 4, [](const cv::Point2f & a, const cv::Point2f & b) { return a.y < b.y; });
-    top = (p[0] + p[1]) / 2;
-    bottom = (p[2] + p[3]) / 2;
-
-    // tilt_angle = std::atan2(std::abs(top.x - bottom.x), std::abs(top.y - bottom.y));
-    // tilt_angle = tilt_angle / CV_PI * 180;
-    tilt_angle = std::atan2(std::abs(top.x - bottom.x), std::abs(top.y - bottom.y));
-    tilt_angle = tilt_angle / CV_PI * 180;
-  }
-
-  int color;
-  cv::Point2f top, bottom;
-  float tilt_angle;
-};
-
 struct boundingbox
 {
   struct {
@@ -75,60 +26,61 @@ struct boundingbox
   } p[4];
 };
 
+struct Light_v8 : public cv::Rect
+{
+  Light_v8() = default;
+  explicit Light_v8(const boundingbox & bbox) 
+  {
+    cv::Point2f p[4];
+    for (int i = 0; i < 4; i++) {
+      p[i].x = bbox.p[i].x;
+      p[i].y = bbox.p[i].y;
+    }
+    std::sort(p, p + 4, [](const cv::Point2f & a, const cv::Point2f & b) { return a.y < b.y; });
+
+    left_top = p[0];
+    right_bottom = p[3];
+    right_top = p[1];
+    left_bottom = p[2];
+
+    left_center = (left_top + left_bottom)/2;
+    right_center = (right_top + right_bottom)/2;
+
+    left_length = left_bottom.y - left_top.y;
+    right_length = right_bottom.y - right_top.y;
+    color = 0;
+    // tilt_angle = std::atan2(std::abs(top.x - bottom.x), std::abs(top.y - bottom.y));
+    // tilt_angle = tilt_angle / CV_PI * 180;
+  }
+
+  int color;
+  cv::Point2f left_top, left_bottom, right_top, right_bottom;
+  cv::Point2f left_center, right_center;
+  double left_length, right_length;
+  // double left_width, right_width;
+  // float tilt_angle;
+};
 
 struct Armor
 {
   Armor() = default;
-  Armor(const Light & l1, const Light & l2)
+  Armor(const boundingbox & bbox)
   {
-    if (l1.center.x < l2.center.x) {
-      left_light = l1, right_light = l2;
-    } else {
-      left_light = l2, right_light = l1;
+    for (int i = 0; i < 4; i++) {
+      light_points.p[i].x = bbox.p[i].x;
+      light_points.p[i].y = bbox.p[i].y;
     }
-    center = (left_light.center + right_light.center) / 2;
-  }
+    center.x =  ((light_points.p[1].x - light_points.p[0].x) + (light_points.p[2].x - light_points.p[3].x))/2;
+    center.y =  ((light_points.p[2].y - light_points.p[1].y) + (light_points.p[3].y - light_points.p[0].y))/2;
 
-  // Light pairs part
-  Light left_light, right_light;
+  }
+  boundingbox light_points;
   cv::Point2f center;
   ArmorType type;
-
-  // Number part
-  // cv::Mat number_img;
   std::string number;
   float confidence;
   std::string classfication_result;
 };
-
-// struct v8_img_data
-// {
-//   std::vector<int> indexes;
-//   rm_auto_aim::boundingbox boundingbox;
-//   int class_id;
-//   float confidence;
-// };
-
-// struct v8_cls_confidence
-// {
-//   // float confidence_sentry_B;
-//   // float confidence_sentry_N;
-//   // float confidence_sentry_R;
-//   float confidence_B1;
-//   float confidence_B2;
-//   float confidence_B3;
-//   float confidence_B4;
-//   float confidence_B5;
-//   float confidence_BO;
-//   float confidence_BS;
-//   float confidence_R1;
-//   float confidence_R2;
-//   float confidence_R3;
-//   float confidence_R4;
-//   float confidence_R5;
-//   float confidence_RO;
-//   float confidence_RS;
-// };
 
 struct v8_cls_confidence {
   std::array<float, 14> confidence_cls;
