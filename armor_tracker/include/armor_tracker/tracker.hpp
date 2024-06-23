@@ -28,7 +28,7 @@ class Tracker
 {
 public:
   Tracker(double max_match_distance, double max_match_yaw_diff);
-
+  
   using Armors = auto_aim_interfaces::msg::Armors;
   using Armor = auto_aim_interfaces::msg::Armor;
 

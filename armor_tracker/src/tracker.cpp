@@ -50,6 +50,7 @@ void Tracker::init(const Armors::SharedPtr & armors_msg)
   tracker_state = DETECTING;
 
   updateArmorsNum(tracked_armor);
+  // ArmorTrackerNode::armortype = tracked_armor.type;
 }
 
 void Tracker::update(const Armors::SharedPtr & armors_msg)

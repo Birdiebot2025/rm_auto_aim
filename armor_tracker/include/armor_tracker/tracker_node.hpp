@@ -30,13 +30,18 @@ namespace rm_auto_aim
 using tf2_filter = tf2_ros::MessageFilter<auto_aim_interfaces::msg::Armors>;
 class ArmorTrackerNode : public rclcpp::Node
 {
+  friend class Tracker; 
 public:
   explicit ArmorTrackerNode(const rclcpp::NodeOptions & options);
 
 private:
+
   void armorsCallback(const auto_aim_interfaces::msg::Armors::SharedPtr armors_ptr);
 
   void publishMarkers(const auto_aim_interfaces::msg::Target & target_msg);
+
+  auto_aim_interfaces::msg::Armor Target2Armor(auto_aim_interfaces::msg::Target target_msg, auto_aim_interfaces::msg::Armor armor);
+  auto_aim_interfaces::msg::Target TargetProcessed(const auto_aim_interfaces::msg::Armors::SharedPtr armors_msg);
 
   // Maximum allowable armor distance in the XOY plane
   double max_armor_distance_;
@@ -60,7 +65,7 @@ private:
   std::shared_ptr<tf2_ros::TransformListener> tf2_listener_;
   message_filters::Subscriber<auto_aim_interfaces::msg::Armors> armors_sub_;
   std::shared_ptr<tf2_filter> tf2_filter_;
-
+  
   // Tracker info publisher
   rclcpp::Publisher<auto_aim_interfaces::msg::TrackerInfo>::SharedPtr info_pub_;
 

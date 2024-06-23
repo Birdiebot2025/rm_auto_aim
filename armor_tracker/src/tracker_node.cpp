@@ -184,7 +184,7 @@ ArmorTrackerNode::ArmorTrackerNode(const rclcpp::NodeOptions & options)
 
 void ArmorTrackerNode::armorsCallback(const auto_aim_interfaces::msg::Armors::SharedPtr armors_msg)
 {
-  // Tranform armor position from image frame to world coordinate
+    // Tranform armor position from image frame to world coordinate
   for (auto & armor : armors_msg->armors) {
     geometry_msgs::msg::PoseStamped ps;
     ps.header = armors_msg->header;
@@ -196,6 +196,29 @@ void ArmorTrackerNode::armorsCallback(const auto_aim_interfaces::msg::Armors::Sh
       return;
     }
   }
+  auto_aim_interfaces::msg::Target target_msg;
+  target_msg = TargetProcessed(armors_msg);
+
+  target_pub_->publish(target_msg);
+  publishMarkers(target_msg);
+
+  for(int i=0;i<4;i++){
+
+    auto_aim_interfaces::msg::Armors armors_processed;
+    auto_aim_interfaces::msg::Armor armor_processed;
+    armors_processed.armors[0] = Target2Armor(target_msg,armors_msg->armors[0]);
+    armors_processed.header = armors_msg->header;
+    armors_processed.header.stamp = rclcpp::Clock().now();
+    
+    auto_aim_interfaces::msg::Target target_msg_processed;
+    target_msg_processed = TargetProcessed(std::make_shared<auto_aim_interfaces::msg::Armors>(armors_processed));
+
+    target_pub_->publish(target_msg_processed);
+    publishMarkers(target_msg_processed);
+  }
+}
+
+auto_aim_interfaces::msg::Target ArmorTrackerNode::TargetProcessed(const auto_aim_interfaces::msg::Armors::SharedPtr armors_msg){
 
   // Filter abnormal armors
   armors_msg->armors.erase(
@@ -262,16 +285,44 @@ void ArmorTrackerNode::armorsCallback(const auto_aim_interfaces::msg::Armors::Sh
       target_msg.radius_1 = state(8);
       target_msg.radius_2 = tracker_->another_r;
       target_msg.dz = tracker_->dz;
-      
+    
     }
   }
-
   last_time_ = time;
-
-  target_pub_->publish(target_msg);
-
-  publishMarkers(target_msg);
+  return target_msg;
 }
+
+// auto_aim_interfaces::msg::Armors ArmorTrackerNode::Target2Armor(auto_aim_interfaces::msg::Target target_msg)
+// {
+//   auto_aim_interfaces::msg::Armors armors;
+
+//   return armors; 
+// }
+auto_aim_interfaces::msg::Armor ArmorTrackerNode::Target2Armor(auto_aim_interfaces::msg::Target target_msg, auto_aim_interfaces::msg::Armor armor)
+{
+    // 在这里填充 armors 的数据
+    armor.pose.position.x = target_msg.position.x + (target_msg.velocity.x * dt_)/3; 
+    armor.pose.position.y = target_msg.position.y + (target_msg.velocity.y * dt_)/3;
+    armor.pose.position.z = target_msg.position.z + (target_msg.velocity.z * dt_)/3;
+
+    // armor.number = target_msg.id;
+    // armor.type = armor.type;
+
+    double cy = cos((target_msg.yaw + target_msg.v_yaw * dt_) * 0.5);
+    double sy = sin((target_msg.yaw + target_msg.v_yaw * dt_) * 0.5);
+    double cp = cos(1.308998 * 0.5);
+    double sp = sin(1.308998 * 0.5);
+    double cr = cos(0.0 * 0.5);
+    double sr = sin(0.0 * 0.5);
+
+    armor.pose.orientation.w = cy * cp * cr + sy * sp * sr;
+    armor.pose.orientation.x = cy * cp * sr - sy * sp * cr;
+    armor.pose.orientation.y = sy * cp * sr + cy * sp * cr;
+    armor.pose.orientation.z = sy * cp * cr - cy * sp * sr;
+
+    return armor;
+}
+
 
 void ArmorTrackerNode::publishMarkers(const auto_aim_interfaces::msg::Target & target_msg)
 {
