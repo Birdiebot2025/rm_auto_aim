@@ -31,7 +31,9 @@ std::vector<Armor> Detector::detect(const cv::Mat & input)
         const float factor = fill_tensor_data_image(input_tensor, input);
 
         /// 执行推理计算
-        infer_request_.infer();
+        // infer_request_.infer();
+        infer_request_.start_async();
+        infer_request_.wait();
 
         // 获得推理结果
         const ov::Tensor output = infer_request_.get_output_tensor();

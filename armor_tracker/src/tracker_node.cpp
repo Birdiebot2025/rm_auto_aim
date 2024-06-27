@@ -196,25 +196,43 @@ void ArmorTrackerNode::armorsCallback(const auto_aim_interfaces::msg::Armors::Sh
       return;
     }
   }
+
   auto_aim_interfaces::msg::Target target_msg;
   target_msg = TargetProcessed(armors_msg);
-
   target_pub_->publish(target_msg);
   publishMarkers(target_msg);
 
-  for(int i=0;i<4;i++){
+  auto_aim_interfaces::msg::Armors armors_processed;
+  armors_processed.header.stamp = rclcpp::Clock().now();
+  armors_processed.header.frame_id = "camera_link";
+  auto_aim_interfaces::msg::Armor armor;
+  armor.number = "0";
+  armor.type = "small";
+  armor.pose.orientation.w = 0.0;
+  armor.pose.orientation.x = 0.0;
+  armor.pose.orientation.y = 0.0;
+  armor.pose.orientation.z = 0.0;
+  armor.pose.position.x = 0.0;
+  armor.pose.position.y =0.0;
+  armor.pose.position.z = 0.0;
 
-    auto_aim_interfaces::msg::Armors armors_processed;
-    auto_aim_interfaces::msg::Armor armor_processed;
-    armors_processed.armors[0] = Target2Armor(target_msg,armors_msg->armors[0]);
-    armors_processed.header = armors_msg->header;
-    armors_processed.header.stamp = rclcpp::Clock().now();
-    
-    auto_aim_interfaces::msg::Target target_msg_processed;
-    target_msg_processed = TargetProcessed(std::make_shared<auto_aim_interfaces::msg::Armors>(armors_processed));
+  if (target_msg.tracking == true || target_msg.pure_predict == 1) {
+    for(int i=0;i<1;i++){
+      auto_aim_interfaces::msg::Target target_msg_processed;
+      if( i == 0 ){
+        armor = Target2Armor(target_msg,armors_msg->armors[0]);
+      }else{
+        armor = Target2Armor(target_msg_processed,armors_msg->armors[0]);
+      }
+      armors_processed.header = armors_msg->header;
+      armors_processed.header.stamp = rclcpp::Clock().now();
 
-    target_pub_->publish(target_msg_processed);
-    publishMarkers(target_msg_processed);
+      armors_processed.armors = {armor};
+      target_msg_processed = TargetProcessed(std::make_shared<auto_aim_interfaces::msg::Armors>(armors_processed));
+
+      target_pub_->publish(target_msg_processed);
+      publishMarkers(target_msg_processed);
+    }
   }
 }
 
@@ -298,15 +316,17 @@ auto_aim_interfaces::msg::Target ArmorTrackerNode::TargetProcessed(const auto_ai
 
 //   return armors; 
 // }
-auto_aim_interfaces::msg::Armor ArmorTrackerNode::Target2Armor(auto_aim_interfaces::msg::Target target_msg, auto_aim_interfaces::msg::Armor armor)
+auto_aim_interfaces::msg::Armor ArmorTrackerNode::Target2Armor(auto_aim_interfaces::msg::Target target_msg, auto_aim_interfaces::msg::Armor armor_old)
 {
-    // 在这里填充 armors 的数据
-    armor.pose.position.x = target_msg.position.x + (target_msg.velocity.x * dt_)/3; 
-    armor.pose.position.y = target_msg.position.y + (target_msg.velocity.y * dt_)/3;
-    armor.pose.position.z = target_msg.position.z + (target_msg.velocity.z * dt_)/3;
+    auto_aim_interfaces::msg::Armor armor;
 
-    // armor.number = target_msg.id;
-    // armor.type = armor.type;
+    // 在这里填充 armors 的数据
+    armor.pose.position.x = target_msg.position.x + (target_msg.velocity.x * dt_)/7; 
+    armor.pose.position.y = target_msg.position.y + (target_msg.velocity.y * dt_)/7;
+    armor.pose.position.z = target_msg.position.z + (target_msg.velocity.z * dt_)/7;
+
+    armor.number = target_msg.id;
+    armor.type = armor_old.type;
 
     double cy = cos((target_msg.yaw + target_msg.v_yaw * dt_) * 0.5);
     double sy = sin((target_msg.yaw + target_msg.v_yaw * dt_) * 0.5);
@@ -320,7 +340,7 @@ auto_aim_interfaces::msg::Armor ArmorTrackerNode::Target2Armor(auto_aim_interfac
     armor.pose.orientation.y = sy * cp * sr + cy * sp * cr;
     armor.pose.orientation.z = sy * cp * cr - cy * sp * sr;
 
-    return armor;
+    return armor;  //这里的问题
 }
 
 

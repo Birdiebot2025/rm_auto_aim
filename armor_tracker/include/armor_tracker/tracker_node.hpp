@@ -40,7 +40,7 @@ private:
 
   void publishMarkers(const auto_aim_interfaces::msg::Target & target_msg);
 
-  auto_aim_interfaces::msg::Armor Target2Armor(auto_aim_interfaces::msg::Target target_msg, auto_aim_interfaces::msg::Armor armor);
+  auto_aim_interfaces::msg::Armor Target2Armor(auto_aim_interfaces::msg::Target target_msg, auto_aim_interfaces::msg::Armor armor_old);
   auto_aim_interfaces::msg::Target TargetProcessed(const auto_aim_interfaces::msg::Armors::SharedPtr armors_msg);
 
   // Maximum allowable armor distance in the XOY plane
