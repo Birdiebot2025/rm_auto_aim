@@ -42,6 +42,7 @@ private:
 
   auto_aim_interfaces::msg::Armor Target2Armor(auto_aim_interfaces::msg::Target target_msg, auto_aim_interfaces::msg::Armor armor_old);
   auto_aim_interfaces::msg::Target TargetProcessed(const auto_aim_interfaces::msg::Armors::SharedPtr armors_msg);
+  auto_aim_interfaces::msg::Target Target2Target(auto_aim_interfaces::msg::Target target_msg);
 
   // Maximum allowable armor distance in the XOY plane
   double max_armor_distance_;

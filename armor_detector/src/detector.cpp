@@ -67,7 +67,7 @@ std::vector<Armor> Detector::detect(const cv::Mat & input)
           cv::minMaxLoc(classes_scores, nullptr, &score, nullptr, &class_id_point);
 
           // 置信度 0～1之间
-          if (score > 0.7) {
+          if (score > 0.5) {
             rm_auto_aim::v8_cls_confidence v8_cls_confidence;
 
             for(int j = 11; j <= 17; j++){

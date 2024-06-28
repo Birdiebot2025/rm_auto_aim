@@ -215,21 +215,16 @@ void ArmorTrackerNode::armorsCallback(const auto_aim_interfaces::msg::Armors::Sh
   armor.pose.position.x = 0.0;
   armor.pose.position.y =0.0;
   armor.pose.position.z = 0.0;
+  
+  auto_aim_interfaces::msg::Target target_msg_processed;
 
   if (target_msg.tracking == true || target_msg.pure_predict == 1) {
-    for(int i=0;i<1;i++){
-      auto_aim_interfaces::msg::Target target_msg_processed;
+    for(int i=0;i<5;i++){
       if( i == 0 ){
-        armor = Target2Armor(target_msg,armors_msg->armors[0]);
+        target_msg_processed = Target2Target(target_msg);
       }else{
-        armor = Target2Armor(target_msg_processed,armors_msg->armors[0]);
+        target_msg_processed = Target2Target(target_msg_processed);
       }
-      armors_processed.header = armors_msg->header;
-      armors_processed.header.stamp = rclcpp::Clock().now();
-
-      armors_processed.armors = {armor};
-      target_msg_processed = TargetProcessed(std::make_shared<auto_aim_interfaces::msg::Armors>(armors_processed));
-
       target_pub_->publish(target_msg_processed);
       publishMarkers(target_msg_processed);
     }
@@ -310,12 +305,15 @@ auto_aim_interfaces::msg::Target ArmorTrackerNode::TargetProcessed(const auto_ai
   return target_msg;
 }
 
-// auto_aim_interfaces::msg::Armors ArmorTrackerNode::Target2Armor(auto_aim_interfaces::msg::Target target_msg)
-// {
-//   auto_aim_interfaces::msg::Armors armors;
+auto_aim_interfaces::msg::Target ArmorTrackerNode::Target2Target(auto_aim_interfaces::msg::Target target_msg)
+{
+  target_msg.position.x += target_msg.velocity.x*dt_/7;
+  target_msg.position.y += target_msg.velocity.y*dt_/7;
+  target_msg.position.z += target_msg.velocity.z*dt_/7;
 
-//   return armors; 
-// }
+  return target_msg; 
+}
+
 auto_aim_interfaces::msg::Armor ArmorTrackerNode::Target2Armor(auto_aim_interfaces::msg::Target target_msg, auto_aim_interfaces::msg::Armor armor_old)
 {
     auto_aim_interfaces::msg::Armor armor;
