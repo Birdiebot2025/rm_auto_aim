@@ -1,0 +1,7 @@
+/armor_detector_nn:
+  ros__parameters:
+    debug: true
+
+    detect_color: 0
+
+    ignore_classes: [2,7,3]  #

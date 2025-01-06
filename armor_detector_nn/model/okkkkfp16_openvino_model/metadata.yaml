@@ -1,0 +1,29 @@
+description: Ultralytics YOLOv8_large_MobileNetV3-pose model trained on /home/birdiebot/Desktop/yolov8/XJTLU_2023_Keypoints_ALL/coco.yaml
+author: Ultralytics
+license: AGPL-3.0 https://ultralytics.com/license
+date: '2024-12-24T22:44:38.498983'
+version: 8.1.5
+stride: 32
+task: pose
+batch: 1
+imgsz:
+- 416
+- 416
+names:
+  0: B1
+  1: B2
+  2: B3
+  3: B4
+  4: B5
+  5: BO
+  6: BS
+  7: R1
+  8: R2
+  9: R3
+  10: R4
+  11: R5
+  12: RO
+  13: RS
+kpt_shape:
+- 4
+- 2
