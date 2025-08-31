@@ -59,3 +59,5 @@ Run the tests with
 - auto_aim_bringup
 
 	包含启动识别节点和处理节点的默认参数文件及 launch 文件
+
+测试测试猫娘猫娘
